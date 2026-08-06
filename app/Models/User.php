@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Builder;
 
 #[Fillable([
     'full_name',
@@ -19,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'role',
     'avatar',
     'password',
+    'is_active'
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -35,12 +39,32 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
         ];
+    }
+
+    protected function password(): Attribute
+    {
+    return Attribute::make(
+        set: fn (string $value) => Hash::needsRehash($value)
+            ? Hash::make($value)
+            : $value,
+        );
     }
 
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
+
+    public function scopeAdmin(Builder $query): Builder
+    {
+        return $query->where('role', 'admin');
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('active', function (Builder $builder) {
+            $builder->where('is_active', true);
+        });
+    }   
 }
