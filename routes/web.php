@@ -8,7 +8,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('users', UserController::class);
+Route::resource('users', UserController::class)->middleware('super_admin');
 
 Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
 
