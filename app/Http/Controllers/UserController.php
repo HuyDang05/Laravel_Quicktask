@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 
 class UserController extends Controller
 {
@@ -12,7 +14,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('users.index');
+        $users = User::with('tasks')->get();
+
+        return view('users.index', compact('users'));
     }
 
     /**
@@ -20,7 +24,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return view('users.create');
     }
 
     /**
@@ -28,7 +32,9 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        User::create($request->validated());
+
+        return redirect()->route('users.index');
     }
 
     /**
@@ -36,7 +42,9 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        $user->load('tasks');
+
+        return view('users.show', compact('user'));
     }
 
     /**
@@ -44,15 +52,23 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        //
+        return view('users.edit', compact('user'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        $data = $request->validated();
+
+        if (empty($data['password'])) {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('users.index');
     }
 
     /**
@@ -60,6 +76,8 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+         $user->delete();
+
+        return redirect()->route('users.index');
     }
 }
