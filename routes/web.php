@@ -21,7 +21,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('users', UserController::class)
-    ->middleware(['auth', 'super_admin']);
+    ->middleware(['auth', 'can:manage-users']);
 
 Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
 Route::get('/tasks/create', [TaskController::class, 'create'])->name('tasks.create');

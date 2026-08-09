@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -53,6 +54,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+        Gate::authorize('update', $user);
+        
         return view('users.edit', compact('user'));
     }
 
@@ -61,6 +64,8 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
+        Gate::authorize('update', $user);
+    
         $data = $request->validated();
 
         if (empty($data['password'])) {
