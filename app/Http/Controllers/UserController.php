@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -76,8 +77,13 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-         $user->delete();
+         DB::transaction(function () use ($user) {
+            $user->tasks()->delete();
 
-        return redirect()->route('users.index');
+            $user->delete();
+        });
+
+        return redirect()->route('users.index')
+        ->with('success', 'Xóa user và các task liên quan thành công.');
     }
 }
